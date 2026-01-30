@@ -6,7 +6,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-@Data // Génère automatiquement les Getters et Setters pour tous les champs
+@Data
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,7 +15,7 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    // Renommé pour correspondre à password_hash dans ta base de données
+    // Doit correspondre au nom de colonne dans ta DB
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
@@ -24,6 +24,4 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Wallet> wallets;
-
-    // Supprime les méthodes vides manuelles, @Data s'occupe de tout maintenant !
 }
