@@ -17,6 +17,9 @@ public class Category {
     // Constructeur vide obligatoire pour JPA
     public Category() {}
 
+    public Category(long l, String transport) {
+    }
+
     // --- GETTERS ET SETTERS ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
