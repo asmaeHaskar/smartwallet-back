@@ -8,9 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.math.BigDecimal;
-import java.util.Optional; // Importation forcée pour corriger l'erreur Locale
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -23,35 +22,38 @@ public class AuthController {
     @Autowired
     private WalletRepository walletRepository;
 
+    // Cette méthode permet de CRÉER ton propre compte
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
-        if (userRepository.existsByEmail(user.getEmail())) {
-            return ResponseEntity.badRequest().body("Email déjà utilisé");
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("Erreur : cet email est déjà utilisé.");
         }
-
+        
+        // Sauvegarde de l'utilisateur
         User savedUser = userRepository.save(user);
 
+        // Création d'un portefeuille automatique pour le nouvel utilisateur
         Wallet wallet = new Wallet();
-        wallet.setName("Mon Portefeuille");
-        wallet.setBalance(new BigDecimal("100.00")); // Solde initial de bienvenue
+        wallet.setName("Portefeuille Principal");
+        wallet.setBalance(new BigDecimal("0.00"));
         wallet.setUser(savedUser);
         walletRepository.save(wallet);
 
         return ResponseEntity.ok(savedUser);
     }
 
+    // Cette méthode permet de se CONNECTER
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User loginRequest) {
-        // Utilisation de Optional pour récupérer l'utilisateur
         Optional<User> userOpt = userRepository.findByEmail(loginRequest.getEmail());
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            // Comparaison avec passwordHash (vérifie que c'est bien écrit dans User.java)
-            if (user.getPasswordHash() != null && user.getPasswordHash().equals(loginRequest.getPasswordHash())) {
+            // Comparaison des mots de passe
+            if (user.getPasswordHash().equals(loginRequest.getPasswordHash())) {
                 return ResponseEntity.ok(user);
             }
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Information incorrecte");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email ou mot de passe incorrect.");
     }
 }
