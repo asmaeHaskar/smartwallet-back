@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.Optional; // Importation forcée pour corriger l'erreur Locale
 
 @RestController
 @RequestMapping("/api/auth")
@@ -24,17 +25,15 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
-        // Vérification simple sans Optional pour éviter les conflits d'import
         if (userRepository.existsByEmail(user.getEmail())) {
             return ResponseEntity.badRequest().body("Email déjà utilisé");
         }
 
         User savedUser = userRepository.save(user);
 
-        // Création manuelle du Wallet
         Wallet wallet = new Wallet();
         wallet.setName("Mon Portefeuille");
-        wallet.setBalance(new BigDecimal("100.00"));
+        wallet.setBalance(new BigDecimal("100.00")); // Solde initial de bienvenue
         wallet.setUser(savedUser);
         walletRepository.save(wallet);
 
@@ -43,16 +42,16 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User loginRequest) {
-        // Utilisation du chemin complet java.util.Optional pour tuer l'erreur Locale
-        java.util.Optional<User> userOpt = userRepository.findByEmail(loginRequest.getEmail());
+        // Utilisation de Optional pour récupérer l'utilisateur
+        Optional<User> userOpt = userRepository.findByEmail(loginRequest.getEmail());
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            // Comparaison directe des mots de passe
-            if (user.getPasswordHash().equals(loginRequest.getPasswordHash())) {
+            // Comparaison avec passwordHash (vérifie que c'est bien écrit dans User.java)
+            if (user.getPasswordHash() != null && user.getPasswordHash().equals(loginRequest.getPasswordHash())) {
                 return ResponseEntity.ok(user);
             }
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Identifiants incorrects");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Information incorrecte");
     }
 }

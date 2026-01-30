@@ -2,12 +2,11 @@ package com.pfe.smartwallet.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
 import java.util.List;
 
 @Entity
 @Table(name = "users")
-@Data
+@Data // Génère automatiquement les Getters et Setters pour tous les champs
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,18 +15,15 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)
-    private String password; // En production, utilise BCrypt pour hacher
+    // Renommé pour correspondre à password_hash dans ta base de données
+    @Column(name = "password_hash", nullable = false)
+    private String passwordHash;
 
+    @Column(name = "full_name")
     private String fullName;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Wallet> wallets;
 
-    public void setPasswordHash(String s) {
-    }
-
-    public Object getPasswordHash() {
-        return null;
-    }
+    // Supprime les méthodes vides manuelles, @Data s'occupe de tout maintenant !
 }

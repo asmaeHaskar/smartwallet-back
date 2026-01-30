@@ -2,15 +2,12 @@ package com.pfe.smartwallet.repository;
 
 import com.pfe.smartwallet.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.Optional; // Importation cruciale ici
-import org.springframework.stereotype.Repository;
+import java.util.Optional;
 
-@Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-
-    // Cette méthode doit retourner un Optional<User> pour que le controlleur fonctionne
+    // Indispensable pour le login
     Optional<User> findByEmail(String email);
 
-    // Utile pour la vérification lors de l'inscription
+    // Indispensable pour le register
     boolean existsByEmail(String email);
 }
